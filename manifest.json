@@ -1,0 +1,23 @@
+{
+    "name":"WhatsApp Clone",
+    "short_name":"WhatsApp",
+    "description":"Real-time messaging app",
+    "start_url":"/",
+    "display":"standalone",
+    "background_color":"#111b21",
+    "theme_color":"#00a884",
+    "orientation":"portrait",
+    "icons":[
+        {
+            "src":"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%2300a884' width='192' height='192' rx='30'/%3E%3Cpath fill='white' d='M96 40c-30.9 0-56 25.1-56 56 0 11.5 3.5 22.2 9.5 31.1L38 152l26.3-6.9C72.2 150.5 83.4 154 96 154c30.9 0 56-25.1 56-56s-25.1-56-56-56zm-12 72c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm24 0c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm24 0c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z'/%3E%3C/svg%3E",
+            "sizes":"192x192",
+            "type":"image/svg+xml"
+        },
+        {
+            "src":"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect fill='%2300a884' width='512' height='512' rx='80'/%3E%3Cpath fill='white' d='M256 107c-82.5 0-149.3 66.8-149.3 149.3 0 30.7 9.3 59.2 25.3 82.9L107 405l70.2-18.4C193 398.7 223 413 256 413c82.5 0 149.3-66.8 149.3-149.3S338.5 107 256 107zm-32 192c-5.9 0-10.7-4.8-10.7-10.7s4.8-10.7 10.7-10.7 10.7 4.8 10.7 10.7-4.8 10.7-10.7 10.7zm64 0c-5.9 0-10.7-4.8-10.7-10.7s4.8-10.7 10.7-10.7 10.7 4.8 10.7 10.7-4.8 10.7-10.7 10.7zm64 0c-5.9 0-10.7-4.8-10.7-10.7s4.8-10.7 10.7-10.7 10.7 4.8 10.7 10.7-4.8 10.7-10.7 10.7z'/%3E%3C/svg%3E",
+            "sizes":"512x512",
+            "type":"image/svg+xml"
+        }
+    ],
+    "gcm_sender_id":"723060342195"
+}

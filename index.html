@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#111b21">
+    <title>WhatsApp Clone</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none}
+        body{background:#111b21;height:100vh;overflow:hidden;color:#e9edef}
+        .login-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:#111b21;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;padding:20px}
+        .login-logo{width:100px;height:100px;background:#00a884;border-radius:20px;display:flex;align-items:center;justify-content:center;margin-bottom:30px;box-shadow:0 10px 30px rgba(0,168,132,0.3)}
+        .login-logo svg{width:60px;height:60px;fill:white}
+        .login-title{font-size:24px;margin-bottom:10px;color:#e9edef}
+        .login-subtitle{color:#8696a0;margin-bottom:40px;text-align:center}
+        .phone-input-container{width:100%;max-width:300px;background:#2a3942;border-radius:10px;padding:15px;margin-bottom:20px}
+        .phone-input-container label{display:block;color:#00a884;font-size:12px;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px}
+        .phone-input-wrapper{display:flex;align-items:center;gap:10px}
+        .country-code{color:#e9edef;font-size:16px}
+        .phone-input{flex:1;background:transparent;border:none;outline:none;color:#e9edef;font-size:16px;padding:5px 0}
+        .otp-input{width:100%;max-width:300px;background:#2a3942;border:none;outline:none;padding:15px;border-radius:10px;color:#e9edef;font-size:20px;text-align:center;letter-spacing:10px;margin-bottom:20px}
+        .login-btn{width:100%;max-width:300px;background:#00a884;color:white;border:none;padding:15px;border-radius:25px;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.3s}
+        .login-btn:active{transform:scale(0.98);opacity:0.9}
+        .login-btn:disabled{opacity:0.5;cursor:not-allowed}
+        .hidden{display:none!important}
+        .profile-setup{position:fixed;top:0;left:0;width:100%;height:100%;background:#111b21;display:none;flex-direction:column;z-index:999}
+        .setup-header{background:#202c33;padding:15px 20px;display:flex;align-items:center;justify-content:center;position:relative}
+        .setup-header h2{font-size:18px;font-weight:600}
+        .setup-content{flex:1;display:flex;flex-direction:column;align-items:center;padding:40px 20px}
+        .dp-upload{width:150px;height:150px;border-radius:50%;background:#2a3942;display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:30px;overflow:hidden;cursor:pointer;border:3px solid #00a884}
+        .dp-upload img{width:100%;height:100%;object-fit:cover;display:none}
+        .dp-upload .camera-icon{position:absolute;color:#8696a0;font-size:40px}
+        .dp-upload.has-image .camera-icon{display:none}
+        .dp-upload.has-image img{display:block}
+        .name-input-container{width:100%;max-width:300px;margin-bottom:20px}
+        .name-input-container label{color:#00a884;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:block}
+        .name-input{width:100%;background:#2a3942;border:none;outline:none;padding:15px;border-radius:10px;color:#e9edef;font-size:16px}
+        .done-btn{background:#00a884;color:white;border:none;padding:12px 40px;border-radius:25px;font-size:16px;font-weight:600;cursor:pointer;margin-top:20px}
+        .app-container{display:none;height:100vh;flex-direction:column}
+        .header{background:#202c33;padding:10px 15px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2a3942}
+        .header-title{font-size:20px;font-weight:600}
+        .header-icons{display:flex;gap:20px}
+        .header-icon{width:24px;height:24px;cursor:pointer;color:#aebac1}
+        .tabs{display:flex;background:#202c33;border-bottom:1px solid #2a3942}
+        .tab{flex:1;padding:15px;text-align:center;color:#8696a0;font-size:14px;font-weight:600;cursor:pointer;position:relative;text-transform:uppercase}
+        .tab.active{color:#00a884}
+        .tab.active::after{content:'';position:absolute;bottom:0;left:20%;width:60%;height:3px;background:#00a884}
+        .chat-list{flex:1;overflow-y:auto;background:#111b21}
+        .chat-item{display:flex;align-items:center;padding:12px 15px;cursor:pointer;transition:background 0.2s;position:relative}
+        .chat-item:hover,.chat-item:active{background:#202c33}
+        .chat-avatar{width:50px;height:50px;border-radius:50%;background:#2a3942;margin-right:15px;position:relative;overflow:hidden;flex-shrink:0}
+        .chat-avatar img{width:100%;height:100%;object-fit:cover}
+        .online-indicator{position:absolute;bottom:2px;right:2px;width:12px;height:12px;background:#00a884;border-radius:50%;border:2px solid #111b21;display:none}
+        .online-indicator.visible{display:block}
+        .chat-info{flex:1;min-width:0}
+        .chat-header-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+        .chat-name{font-weight:600;font-size:16px;color:#e9edef;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .chat-time{font-size:12px;color:#8696a0}
+        .chat-message-row{display:flex;justify-content:space-between;align-items:center}
+        .chat-message{font-size:14px;color:#8696a0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%}
+        .chat-message.typing{color:#00a884;font-style:italic}
+        .unread-badge{background:#00a884;color:white;font-size:11px;padding:2px 6px;border-radius:10px;min-width:18px;text-align:center}
+        .fab{position:fixed;bottom:25px;right:25px;width:56px;height:56px;background:#00a884;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.4);cursor:pointer;z-index:100;transition:transform 0.2s}
+        .fab:active{transform:scale(0.95)}
+        .fab svg{width:24px;height:24px;fill:white}
+        .chat-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:#0b141a;display:none;flex-direction:column;z-index:200}
+        .selection-bar{background:#202c33;padding:15px;display:none;align-items:center;justify-content:space-between;border-bottom:1px solid #2a3942}
+        .selection-bar.active{display:flex}
+        .selection-count{font-weight:600;color:#e9edef}
+        .selection-actions{display:flex;gap:25px}
+        .selection-action{color:#aebac1;cursor:pointer;font-size:20px;display:flex;flex-direction:column;align-items:center;gap:4px}
+        .selection-action span{font-size:11px}
+        .chat-header{background:#202c33;padding:10px 15px;display:flex;align-items:center;gap:15px}
+        .back-btn{color:#aebac1;cursor:pointer;font-size:24px}
+        .chat-header-avatar{width:40px;height:40px;border-radius:50%;background:#2a3942;overflow:hidden;position:relative}
+        .chat-header-avatar img{width:100%;height:100%;object-fit:cover}
+        .chat-header-info{flex:1}
+        .chat-header-name{font-weight:600;font-size:16px;color:#e9edef}
+        .chat-header-status{font-size:13px;color:#8696a0}
+        .chat-header-status.online{color:#00a884}
+        .chat-header-status.typing{color:#00a884}
+        .chat-messages{flex:1;overflow-y:auto;padding:20px;background-image:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><rect fill="%23ffffff" width="100" height="100"/></svg>');background-color:#0b141a}
+        .message{max-width:75%;margin-bottom:12px;padding:8px 12px;border-radius:8px;position:relative;word-wrap:break-word;animation:messageSlide 0.3s ease}
+        @keyframes messageSlide{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .message.sent{background:#005c4b;margin-left:auto;border-bottom-right-radius:0}
+        .message.received{background:#202c33;margin-right:auto;border-bottom-left-radius:0}
+        .message.selected{background:#1f2c34!important;border:2px solid #00a884}
+        .message-text{color:#e9edef;font-size:14.2px;line-height:1.4;margin-bottom:4px}
+        .message-time{font-size:11px;color:#8696a0;text-align:right;display:flex;align-items:center;justify-content:flex-end;gap:4px}
+        .message-status{width:16px;height:16px}
+        .message-status.read{color:#53bdeb}
+        .chat-input-area{background:#202c33;padding:10px 15px;display:flex;align-items:center;gap:10px}
+        .chat-input{flex:1;background:#2a3942;border:none;outline:none;padding:12px 15px;border-radius:20px;color:#e9edef;font-size:15px}
+        .chat-input::placeholder{color:#8696a0}
+        .send-btn{width:45px;height:45px;background:#00a884;border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.2s}
+        .send-btn:active{transform:scale(0.95)}
+        .send-btn svg{width:20px;height:20px;fill:white;margin-left:2px}
+        .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;z-index:300;padding:20px}
+        .modal-overlay.active{display:flex}
+        .modal-content{background:#111b21;width:100%;max-width:400px;border-radius:15px;overflow:hidden}
+        .modal-header{background:#202c33;padding:20px;display:flex;justify-content:space-between;align-items:center}
+        .modal-title{font-size:18px;font-weight:600}
+        .modal-close{color:#aebac1;cursor:pointer;font-size:24px}
+        .modal-body{padding:20px}
+        .contact-input{width:100%;background:#2a3942;border:none;outline:none;padding:15px;border-radius:10px;color:#e9edef;font-size:16px;margin-bottom:15px}
+        .start-chat-btn{width:100%;background:#00a884;color:white;border:none;padding:15px;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer}
+        .status-list{flex:1;overflow-y:auto;background:#111b21;display:none}
+        .status-item{display:flex;align-items:center;padding:15px;cursor:pointer;border-bottom:1px solid #202c33}
+        .status-ring{width:60px;height:60px;border-radius:50%;padding:3px;background:linear-gradient(45deg,#00a884,#00d9a5);margin-right:15px}
+        .status-ring-inner{width:100%;height:100%;border-radius:50%;background:#111b21;padding:2px}
+        .status-ring-inner img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+        .add-status{position:relative}
+        .add-status-btn{position:absolute;bottom:0;right:0;width:20px;height:20px;background:#00a884;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:14px;border:2px solid #111b21}
+        .my-status{background:#2a3942}
+        .status-view{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:none;flex-direction:column;z-index:400}
+        .status-view.active{display:flex}
+        .status-progress{height:3px;background:rgba(255,255,255,0.3);width:100%}
+        .status-progress-bar{height:100%;background:white;width:0%;transition:width 0.1s linear}
+        .status-content{flex:1;display:flex;align-items:center;justify-content:center;padding:40px;text-align:center}
+        .status-text{font-size:24px;color:white;word-wrap:break-word}
+        .status-close{position:absolute;top:20px;right:20px;color:white;font-size:30px;cursor:pointer}
+        .empty-state{text-align:center;padding:60px 20px;color:#8696a0}
+        .empty-state-icon{font-size:60px;margin-bottom:20px;opacity:0.5}
+        ::-webkit-scrollbar{width:6px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:#374045;border-radius:3px}
+    </style>
+</head>
+<body>
+    <div class="login-screen" id="loginScreen">
+        <div class="login-logo">
+            <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        </div>
+        <h1 class="login-title">Welcome to WhatsApp</h1>
+        <p class="login-subtitle" id="loginSubtitle">Enter your phone number</p>
+        <div class="phone-input-container" id="phoneContainer">
+            <label>Phone Number</label>
+            <div class="phone-input-wrapper">
+                <span class="country-code">+92</span>
+                <input type="tel" class="phone-input" id="phoneInput" placeholder="3XX XXXXXXX" maxlength="10">
+            </div>
+        </div>
+        <input type="text" class="otp-input hidden" id="otpInput" placeholder="123456" maxlength="6">
+        <button class="login-btn" id="loginBtn" onclick="sendOTP()">Next</button>
+    </div>
+
+    <div class="profile-setup" id="profileSetup">
+        <div class="setup-header"><h2>Profile Info</h2></div>
+        <div class="setup-content">
+            <div class="dp-upload" id="dpUpload" onclick="selectDP()">
+                <span class="camera-icon">📷</span>
+                <img id="dpPreview" alt="">
+            </div>
+            <input type="file" id="dpInput" accept="image/*" style="display:none" onchange="handleDPChange(event)">
+            <div class="name-input-container">
+                <label>Your Name</label>
+                <input type="text" class="name-input" id="nameInput" placeholder="Enter your name" maxlength="25">
+            </div>
+            <button class="done-btn" onclick="saveProfile()">Next</button>
+        </div>
+    </div>
+
+    <div class="app-container" id="appContainer">
+        <div class="header">
+            <span class="header-title">WhatsApp</span>
+            <div class="header-icons">
+                <svg class="header-icon" viewBox="0 0 24 24" fill="currentColor" onclick="logout()"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+            </div>
+        </div>
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('chats')">Chats</div>
+            <div class="tab" onclick="switchTab('status')">Status</div>
+        </div>
+        <div class="chat-list" id="chatList"></div>
+        <div class="status-list" id="statusList">
+            <div class="status-item" onclick="addNewStatus()">
+                <div class="status-ring my-status">
+                    <div class="status-ring-inner add-status">
+                        <img src="" id="myStatusImg" alt="">
+                        <div class="add-status-btn">+</div>
+                    </div>
+                </div>
+                <div class="chat-info">
+                    <div class="chat-header-row"><span class="chat-name">My Status</span></div>
+                    <div class="chat-message-row"><span class="chat-message" id="myStatusText">Tap to add status</span></div>
+                </div>
+            </div>
+            <div id="otherStatuses"></div>
+        </div>
+        <div class="fab" onclick="openNewChat()" id="fabBtn">
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+        </div>
+    </div>
+
+    <div class="chat-screen" id="chatScreen">
+        <div class="selection-bar" id="selectionBar">
+            <span class="selection-count" id="selectionCount">0 selected</span>
+            <div class="selection-actions">
+                <div class="selection-action" onclick="copySelected()">📋<span>Copy</span></div>
+                <div class="selection-action" onclick="forwardSelected()">➡️<span>Forward</span></div>
+                <div class="selection-action" onclick="deleteSelected()">🗑️<span>Delete</span></div>
+            </div>
+        </div>
+        <div class="chat-header" id="chatHeader">
+            <span class="back-btn" onclick="closeChat()">←</span>
+            <div class="chat-header-avatar"><img src="" id="chatAvatar" alt=""></div>
+            <div class="chat-header-info">
+                <div class="chat-header-name" id="chatName">Contact</div>
+                <div class="chat-header-status" id="chatStatus">last seen</div>
+            </div>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-area">
+            <input type="text" class="chat-input" id="messageInput" placeholder="Message" onkeypress="handleKeyPress(event)">
+            <button class="send-btn" onclick="sendMessage()">
+                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="newChatModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">New Chat</span>
+                <span class="modal-close" onclick="closeNewChat()">×</span>
+            </div>
+            <div class="modal-body">
+                <input type="tel" class="contact-input" id="newContactNumber" placeholder="Enter phone number (e.g., 3001234567)">
+                <button class="start-chat-btn" onclick="startNewChat()">Start Chat</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-view" id="statusView">
+        <div class="status-progress"><div class="status-progress-bar" id="statusProgress"></div></div>
+        <span class="status-close" onclick="closeStatus()">×</span>
+        <div class="status-content"><p class="status-text" id="viewStatusText"></p></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
+
+    <script>
+        const firebaseConfig={apiKey:"AIzaSyC1kFKHlRTYdul2XFsJI5qHVvSzHlUCNBw",authDomain:"whats-napp.firebaseapp.com",databaseURL:"https://whats-napp-default-rtdb.firebaseio.com",projectId:"whats-napp",storageBucket:"whats-napp.firebasestorage.app",messagingSenderId:"723060342195",appId:"1:723060342195:web:ebae6b3c6568199a189fc6"};
+        firebase.initializeApp(firebaseConfig);
+        const auth=firebase.auth(),database=firebase.database(),storage=firebase.storage(),messaging=firebase.messaging();
+        let currentUser=null,currentChat=null,selectedMessages=new Set(),selectionMode=false,typingTimeout=null,statusTimer=null;
+
+        window.onload=function(){
+            auth.onAuthStateChanged(user=>{
+                if(user){currentUser=user;loadUserData()}
+                else{showLogin()}
+            });
+            requestNotificationPermission();
+        };
+
+        async function requestNotificationPermission(){
+            try{
+                await Notification.requestPermission();
+                if('serviceWorker' in navigator){
+                    const reg=await navigator.serviceWorker.register('firebase-messaging-sw.js');
+                    messaging.useServiceWorker(reg);
+                    const token=await messaging.getToken();
+                    if(token&&currentUser) await database.ref(`users/${currentUser.uid}/fcmToken`).set(token);
+                }
+            }catch(e){console.log('Notification error:',e)}
+        }
+
+        messaging.onMessage(payload=>{
+            const{title,body}=payload.notification;
+            new Notification(title,{body,icon:'/icon-192x192.png',badge:'/badge-72x72.png',tag:payload.data?.chatId||'default'});
+            playNotificationSound();
+            if(document.getElementById('appContainer').style.display!=='none') updateChatList();
+        });
+
+        function playNotificationSound(){
+            const audio=new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZSA0PVanu87plHQUuh9Dz2YU2Bhxqv+zplkcODVGm5O+4ZSAEMYrO89GFNwYdcfDr4ZdJDQtPp+XysWUeBjqT1/PQfS4GI3/R8tSFNwYdcfDr4plHDAtQp+TwxGUhBjqT1/PQfS4GI3/R8tSFNwYdcfDr4plHDAtQp+TwxmUgBDeOzvPVhjYGHG3A7+SaSQ0MTKjl8b1lHwU2jc7z1YU1Bhxwv+zmm0gNC1Gn5O/EZSAFNo/M89CEMwYccPDs4ppIDQtRp+TvvWUfBTiOz/PShjUGG3Dw7OKbSA0LUqjl8L1lHwU3jM/z0oU1Bxtw8OzhmUgNC1Ko5fC+ZSAF');
+            audio.play().catch(e=>console.log('Sound error:',e));
+        }
+
+        function showLogin(){
+            document.getElementById('loginScreen').style.display='flex';
+            document.getElementById('profileSetup').style.display='none';
+            document.getElementById('appContainer').style.display='none';
+        }
+
+        let confirmationResult=null;
+
+        async function sendOTP(){
+            const btn=document.getElementById('loginBtn'),phoneInput=document.getElementById('phoneInput'),otpInput=document.getElementById('otpInput'),phoneContainer=document.getElementById('phoneContainer'),subtitle=document.getElementById('loginSubtitle');
+            if(!confirmationResult){
+                const phone='+92'+phoneInput.value.trim();
+                if(phone.length<13){alert('Valid number daalo');return}
+                btn.disabled=true;btn.textContent='Sending...';
+                try{
+                    const appVerifier=new firebase.auth.RecaptchaVerifier('loginBtn',{size:'invisible'});
+                    confirmationResult=await auth.signInWithPhoneNumber(phone,appVerifier);
+                    phoneContainer.classList.add('hidden');
+                    otpInput.classList.remove('hidden');
+                    subtitle.textContent='OTP bheja: '+phone;
+                    btn.textContent='Verify';btn.disabled=false;
+                    otpInput.focus();
+                }catch(error){
+                    console.error(error);
+                    alert('Error: '+error.message);
+                    btn.disabled=false;btn.textContent='Next';
+                }
+            }else{
+                const otp=otpInput.value.trim();
+                if(otp.length!==6){alert('6 digit OTP daalo');return}
+                btn.disabled=true;btn.textContent='Verifying...';
+                try{
+                    await confirmationResult.confirm(otp);
+                }catch(error){
+                    alert('Galat OTP');
+                    btn.disabled=false;btn.textContent='Verify';
+                }
+            }
+        }
+
+        async function loadUserData(){
+            const snap=await database.ref(`users/${currentUser.uid}`).once('value');
+            const userData=snap.val();
+            if(userData&&userData.name){
+                document.getElementById('loginScreen').style.display='none';
+                document.getElementById('profileSetup').style.display='none';
+                document.getElementById('appContainer').style.display='flex';
+                document.getElementById('myStatusImg').src=userData.dp||'';
+                document.getElementById('myStatusText').textContent=userData.status||'Tap to add status';
+                updateChatList();setupPresence();listenForMessages();
+            }else{
+                document.getElementById('loginScreen').style.display='none';
+                document.getElementById('profileSetup').style.display='flex';
+            }
+        }
+
+        function selectDP(){document.getElementById('dpInput').click()}
+
+        function handleDPChange(e){
+            const file=e.target.files[0];
+            if(file){
+                const reader=new FileReader();
+                reader.onload=function(evt){
+                    document.getElementById('dpPreview').src=evt.target.result;
+                    document.getElementById('dpUpload').classList.add('has-image');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function saveProfile(){
+            const name=document.getElementById('nameInput').value.trim();
+            if(!name){alert('Naam daalo');return}
+            const dp=document.getElementById('dpPreview').src||'';
+            await database.ref(`users/${currentUser.uid}`).set({
+                phone:currentUser.phoneNumber,name:name,dp:dp,status:'Hey there! I am using WhatsApp.',statusTime:Date.now(),online:true,lastSeen:Date.now()
+            });
+            loadUserData();
+        }
+
+        function setupPresence(){
+            const userStatusRef=database.ref(`users/${currentUser.uid}`);
+            userStatusRef.update({online:true,lastSeen:Date.now()});
+            userStatusRef.onDisconnect().update({online:false,lastSeen:Date.now()});
+            setInterval(()=>userStatusRef.update({lastSeen:Date.now()}),30000);
+        }
+
+        function switchTab(tab){
+            document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+            event.target.classList.add('active');
+            if(tab==='chats'){
+                document.getElementById('chatList').style.display='block';
+                document.getElementById('statusList').style.display='none';
+                document.getElementById('fabBtn').style.display='flex';
+                updateChatList();
+            }else{
+                document.getElementById('chatList').style.display='none';
+                document.getElementById('statusList').style.display='block';
+                document.getElementById('fabBtn').style.display='none';
+                updateStatusList();
+            }
+        }
+
+        async function updateChatList(){
+            const list=document.getElementById('chatList');
+            list.innerHTML='';
+            const chatsSnap=await database.ref(`userChats/${currentUser.uid}`).once('value');
+            const chatIds=chatsSnap.val()||{};
+            if(Object.keys(chatIds).length===0){
+                list.innerHTML='<div class="empty-state"><div class="empty-state-icon">💬</div><h3>No chats yet</h3><p>Tap the message button to start a new chat</p></div>';
+                return;
+            }
+            for(const[chatId,chatInfo]of Object.entries(chatIds)){
+                const otherUid=chatInfo.otherUid;
+                const userSnap=await database.ref(`users/${otherUid}`).once('value');
+                const userData=userSnap.val();
+                if(!userData)continue;
+                const msgsSnap=await database.ref(`chats/${chatId}/messages`).limitToLast(1).once('value');
+                const msgs=msgsSnap.val()||{};
+                const lastMsg=Object.values(msgs)[0];
+                const unreadSnap=await database.ref(`chats/${chatId}/unread/${currentUser.uid}`).once('value');
+                const unreadCount=unreadSnap.val()||0;
+                const item=document.createElement('div');
+                item.className='chat-item';
+                item.onclick=()=>openChat(chatId,otherUid);
+                item.innerHTML=`<div class="chat-avatar"><img src="${userData.dp||''}" alt="" onerror="this.style.display='none'"><div class="online-indicator ${userData.online?'visible':''}"></div></div><div class="chat-info"><div class="chat-header-row"><span class="chat-name">${userData.name}</span><span class="chat-time">${lastMsg?formatTime(lastMsg.timestamp):''}</span></div><div class="chat-message-row"><span class="chat-message">${lastMsg?lastMsg.text:'No messages'}</span>${unreadCount>0?`<span class="unread-badge">${unreadCount}</span>`:''}</div></div>`;
+                list.appendChild(item);
+            }
+        }
+
+        function openNewChat(){document.getElementById('newChatModal').classList.add('active')}
+        function closeNewChat(){document.getElementById('newChatModal').classList.remove('active')}
+
+        async function startNewChat(){
+            const number=document.getElementById('newContactNumber').value.trim();
+            if(number.length<10){alert('Valid number daalo');return}
+            const phone='+92'+number;
+            if(phone===currentUser.phoneNumber){alert('Khud se nahi');return}
+            const usersSnap=await database.ref('users').orderByChild('phone').equalTo(phone).once('value');
+            const users=usersSnap.val();
+            if(!users){alert('User nahi mila! Pehle unko join karne bolo.');return}
+            const otherUid=Object.keys(users)[0];
+            const chatId=[currentUser.uid,otherUid].sort().join('_');
+            const existingChat=await database.ref(`userChats/${currentUser.uid}/${chatId}`).once('value');
+            if(existingChat.val()){closeNewChat();openChat(chatId,otherUid);return}
+            await database.ref(`userChats/${currentUser.uid}/${chatId}`).set({otherUid,timestamp:Date.now(),lastMessage:'',lastMessageTime:Date.now()});
+            await database.ref(`userChats/${otherUid}/${chatId}`).set({otherUid:currentUser.uid,timestamp:Date.now(),lastMessage:'',lastMessageTime:Date.now()});
+            await database.ref(`chats/${chatId}/members`).set({[currentUser.uid]:true,[otherUid]:true});
+            closeNewChat();openChat(chatId,otherUid);showToast('Chat started!');
+        }
+
+        async function openChat(chatId,otherUid){
+            currentChat={chatId,otherUid};selectedMessages.clear();selectionMode=false;document.getElementById('selectionBar').classList.remove('active');
+            const userSnap=await database.ref(`users/${otherUid}`).once('value');
+            const userData=userSnap.val();
+            document.getElementById('chatName').textContent=userData.name;
+            document.getElementById('chatAvatar').src=userData.dp||'';
+            updateChatStatus(userData);
+            await database.ref(`chats/${chatId}/unread/${currentUser.uid}`).set(0);
+            renderMessages();
+            document.getElementById('chatScreen').style.display='flex';
+            database.ref(`chats/${chatId}/messages`).on('value',snap=>renderMessages(snap.val()));
+            database.ref(`typing/${chatId}/${otherUid}`).on('value',snap=>{
+                const isTyping=snap.val();
+                const statusEl=document.getElementById('chatStatus');
+                if(isTyping){statusEl.textContent='typing...';statusEl.className='chat-header-status typing'}
+                else{updateChatStatus(userData)}
+            });
+            database.ref(`users/${otherUid}`).on('value',snap=>updateChatStatus(snap.val()));
+        }
+
+        function updateChatStatus(userData){
+            const statusEl=document.getElementById('chatStatus');
+            if(userData.online){statusEl.textContent='online';statusEl.className='chat-header-status online'}
+            else{statusEl.textContent='last seen '+formatLastSeen(userData.lastSeen);statusEl.className='chat-header-status'}
+        }
+
+        function closeChat(){
+            document.getElementById('chatScreen').style.display='none';
+            if(currentChat){
+                database.ref(`chats/${currentChat.chatId}/messages`).off();
+                database.ref(`typing/${currentChat.chatId}/${currentChat.otherUid}`).off();
+                database.ref(`users/${currentChat.otherUid}`).off();
+            }
+            currentChat=null;updateChatList();
+        }
+
+        function renderMessages(messages=null){
+            const container=document.getElementById('chatMessages');
+            container.innerHTML='';
+            if(!currentChat)return;
+            if(!messages){
+                database.ref(`chats/${currentChat.chatId}/messages`).once('value').then(snap=>renderMessages(snap.val()));
+                return;
+            }
+            if(!messages||Object.keys(messages).length===0){
+                container.innerHTML='<div style="text-align:center;color:#8696a0;padding:40px;">No messages yet. Say hello! 👋</div>';
+                return;
+            }
+            const sortedMsgs=Object.entries(messages).sort((a,b)=>(a[1].timestamp||0)-(b[1].timestamp||0));
+            sortedMsgs.forEach(([msgId,msg])=>{
+                const div=document.createElement('div');
+                const isSent=msg.sender===currentUser.uid;
+                div.className=`message ${isSent?'sent':'received'}`;
+                div.dataset.msgId=msgId;
+                if(selectedMessages.has(msgId))div.classList.add('selected');
+                div.innerHTML=`<div class="message-text">${escapeHtml(msg.text||'')}</div><div class="message-time">${formatTime(msg.timestamp)}${isSent?`<svg class="message-status ${msg.read?'read':''}" viewBox="0 0 16 15" fill="currentColor" style="width:16px;height:16px;margin-left:4px;"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"/></svg>`:''}</div>`;
+                let longPressTimer;
+                div.addEventListener('mousedown',()=>{longPressTimer=setTimeout(()=>startSelection(msgId),500)});
+                div.addEventListener('mouseup',()=>clearTimeout(longPressTimer));
+                div.addEventListener('mouseleave',()=>clearTimeout(longPressTimer));
+                div.addEventListener('touchstart',()=>{longPressTimer=setTimeout(()=>startSelection(msgId),500)});
+                div.addEventListener('touchend',()=>clearTimeout(longPressTimer));
+                container.appendChild(div);
+            });
+            container.scrollTop=container.scrollHeight;
+            if(currentChat)markMessagesAsRead();
+        }
+
+        function escapeHtml(text){const div=document.createElement('div');div.textContent=text;return div.innerHTML}
+        function formatTime(ts){return new Date(ts).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}
+        function formatLastSeen(ts){const d=new Date(ts),now=new Date(),diff=now-d;if(diff<60000)return'just now';if(diff<3600000)return Math.floor(diff/60000)+' min ago';return d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}
+
+        function startSelection(msgId){
+            if(!selectionMode){selectionMode=true;selectedMessages.clear();document.getElementById('selectionBar').classList.add('active')}
+            toggleSelection(msgId);
+        }
+
+        function toggleSelection(msgId){
+            if(selectedMessages.has(msgId))selectedMessages.delete(msgId);else selectedMessages.add(msgId);
+            if(selectedMessages.size===0){selectionMode=false;document.getElementById('selectionBar').classList.remove('active')}
+            else{document.getElementById('selectionCount').textContent=selectedMessages.size+' selected'}
+            renderMessages();
+        }
+
+        async function copySelected(){
+            const texts=[],snap=await database.ref(`chats/${currentChat.chatId}/messages`).once('value'),msgs=snap.val();
+            selectedMessages.forEach(id=>{if(msgs[id])texts.push(msgs[id].text)});
+            navigator.clipboard.writeText(texts.join('\n'));showToast('Copied');exitSelection();
+        }
+
+        async function forwardSelected(){
+            const phone=prompt('Number daalo:');
+            if(!phone)return;
+            const fullPhone=phone.startsWith('+')?phone:'+92'+phone;
+            const usersSnap=await database.ref('users').orderByChild('phone').equalTo(fullPhone).once('value');
+            const users=usersSnap.val();
+            if(!users){alert('User nahi mila');return}
+            const otherUid=Object.keys(users)[0],chatId=[currentUser.uid,otherUid].sort().join('_');
+            await database.ref(`userChats/${currentUser.uid}/${chatId}`).set({otherUid,timestamp:Date.now(),lastMessage:'',lastMessageTime:Date.now()});
+            await database.ref(`userChats/${otherUid}/${chatId}`).set({otherUid:currentUser.uid,timestamp:Date.now(),lastMessage:'',lastMessageTime:Date.now()});
+            await database.ref(`chats/${chatId}/members`).set({[currentUser.uid]:true,[otherUid]:true});
+            const snap=await database.ref(`chats/${currentChat.chatId}/messages`).once('value'),msgs=snap.val();
+            selectedMessages.forEach(async id=>{if(msgs[id])await database.ref(`chats/${chatId}/messages`).push({text:msgs[id].text,sender:currentUser.uid,timestamp:Date.now(),read:false})});
+            showToast('Forwarded');exitSelection();
+        }
+
+        async function deleteSelected(){
+            if(!confirm('Delete?'))return;
+            selectedMessages.forEach(async id=>{await database.ref(`chats/${currentChat.chatId}/messages/${id}`).remove()});
+            exitSelection();
+        }
+
+        function exitSelection(){selectionMode=false;selectedMessages.clear();document.getElementById('selectionBar').classList.remove('active');renderMessages()}
+
+        async function sendMessage(){
+            const input=document.getElementById('messageInput'),text=input.value.trim();
+            if(!text||!currentChat)return;
+            try{
+                await database.ref(`chats/${currentChat.chatId}/messages`).push({text:text,sender:currentUser.uid,timestamp:Date.now(),read:false});
+                await database.ref(`userChats/${currentUser.uid}/${currentChat.chatId}`).update({lastMessage:text,lastMessageTime:Date.now(),timestamp:Date.now()});
+                await database.ref(`userChats/${currentChat.otherUid}/${currentChat.chatId}`).update({lastMessage:text,lastMessageTime:Date.now(),timestamp:Date.now()});
+                const unreadRef=database.ref(`chats/${currentChat.chatId}/unread/${currentChat.otherUid}`);
+                const unreadSnap=await unreadRef.once('value');
+                await unreadRef.set((unreadSnap.val()||0)+1);
+                input.value='';
+            }catch(error){console.error('Send error:',error);alert('Message bhejne mein error');}
+        }
+
+        async function markMessagesAsRead(){
+            if(!currentChat)return;
+            const messagesRef=database.ref(`chats/${currentChat.chatId}/messages`);
+            const snapshot=await messagesRef.once('value');
+            const messages=snapshot.val()||{};
+            const updates={};
+            Object.entries(messages).forEach(([msgId,msg])=>{if(msg.sender!==currentUser.uid&&!msg.read)updates[`${msgId}/read`]=true});
+            if(Object.keys(updates).length>0)await messagesRef.update(updates);
+            await database.ref(`chats/${currentChat.chatId}/unread/${currentUser.uid}`).set(0);
+        }
+
+        function handleKeyPress(e){
+            if(e.key==='Enter')sendMessage();
+            if(currentChat){
+                database.ref(`typing/${currentChat.chatId}/${currentUser.uid}`).set(true);
+                clearTimeout(typingTimeout);
+                typingTimeout=setTimeout(()=>{database.ref(`typing/${currentChat.chatId}/${currentUser.uid}`).set(false)},3000);
+            }
+        }
+
+        async function addNewStatus(){
+            const status=prompt('Status daalo (max 100):');
+            if(!status||!status.trim())return;
+            await database.ref(`users/${currentUser.uid}`).update({status:status.trim(),statusTime:Date.now()});
+            document.getElementById('myStatusText').textContent=status.trim();
+            if(document.getElementById('statusList').style.display!=='none')updateStatusList();
+            showToast('Status updated');
+        }
+
+        async function updateStatusList(){
+            const container=document.getElementById('otherStatuses');
+            container.innerHTML='';
+            try{
+                const snap=await database.ref('users').once('value');
+                const users=snap.val()||{};
+                const now=Date.now();
+                const oneDay=24*60*60*1000;
+                let hasStatuses=false;
+                for(const[uid,userData]of Object.entries(users)){
+                    if(uid===currentUser.uid)continue;
+                    if(!userData.status||!userData.status.trim())continue;
+                    const statusAge=now-(userData.statusTime||0);
+                    if(statusAge>oneDay)continue;
+                    hasStatuses=true;
+                    const div=document.createElement('div');
+                    div.className='status-item';
+                    div.onclick=()=>viewStatus(userData);
+                    div.innerHTML=`<div class="status-ring"><div class="status-ring-inner"><img src="${userData.dp||''}" alt="" onerror="this.style.display='none'"></div></div><div class="chat-info"><div class="chat-header-row"><span class="chat-name">${userData.name||'Unknown'}</span></div><div class="chat-message-row"><span class="chat-message">${formatTime(userData.statusTime)}</span></div></div>`;
+                    container.appendChild(div);
+                }
+                if(!hasStatuses)container.innerHTML='<div style="text-align:center;padding:40px;color:#8696a0;"><p>No recent statuses</p></div>';
+            }catch(error){console.error('Status error:',error);}
+        }
+
+        function viewStatus(userData){
+            const view=document.getElementById('statusView');
+            const textEl=document.getElementById('viewStatusText');
+            const bar=document.getElementById('statusProgress');
+            textEl.textContent=userData.status||'No status';
+            view.classList.add('active');
+            let progress=0;
+            bar.style.width='0%';
+            if(window.statusViewTimer)clearInterval(window.statusViewTimer);
+            window.statusViewTimer=setInterval(()=>{
+                progress+=2;
+                bar.style.width=progress+'%';
+                if(progress>=100){clearInterval(window.statusViewTimer);closeStatus();}
+            },100);
+        }
+
+        function closeStatus(){
+            if(window.statusViewTimer)clearInterval(window.statusViewTimer);
+            document.getElementById('statusView').classList.remove('active');
+            document.getElementById('statusProgress').style.width='0%';
+        }
+
+        function showToast(msg){
+            const div=document.createElement('div');
+            div.style.cssText='position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#2a3942;color:white;padding:12px 24px;border-radius:25px;z-index:1000;font-size:14px;';
+            div.textContent=msg;
+            document.body.appendChild(div);
+            setTimeout(()=>div.remove(),2000);
+        }
+
+        function logout(){auth.signOut();location.reload()}
+
+        function listenForMessages(){
+            database.ref(`userChats/${currentUser.uid}`).on('child_changed',async snap=>{
+                const chatId=snap.key;
+                if(document.getElementById('chatScreen').style.display==='flex'&&currentChat?.chatId===chatId)return;
+                playNotificationSound();
+            });
+        }
+
+        document.addEventListener('contextmenu',e=>e.preventDefault());
+    </script>
+</body>
+</html>
